@@ -1,0 +1,13 @@
+{
+  "name": "final-mausoleum-17-version",
+  "version": "1.0.0",
+  "description": "Mausoleum 2.2 – a Phaser 3 dark fantasy tower-defense game",
+  "type": "module",
+  "scripts": {
+    "start": "npx http-server -p 8080 ."
+  },
+  "devDependencies": {
+    "phaser": "^3.60.0"
+  }
+}
+

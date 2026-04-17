@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mausoleum 2.2</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="game-container"></div>
+
+  <!--
+    Load Phaser 3 (CDN preferred; falls back to committed local copy).
+    The ES module in main.js runs after DOMContentLoaded, giving this
+    synchronous script block time to resolve first.
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+
+  <!-- If CDN fails, load committed local copy before the module. -->
+  <script>
+    if (typeof Phaser === 'undefined') {
+      document.write('<script src="js/vendor/phaser.min.js"><\/script>');
+    }
+  </script>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
