@@ -1,5 +1,6 @@
 node_modules/
 phaser.min.js
+!js/vendor/phaser.min.js
 package-lock.json
 *.log
 /tmp/
