@@ -611,10 +611,10 @@ export default class GameScene extends Phaser.Scene {
   }
 
   _recalcSynergies() {
-    const dirs = [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[1,-1],[-1,1],[1,1]];
+    const neighborOffsets = [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[1,-1],[-1,1],[1,1]];
     this.artifacts.forEach((art, key) => {
       let adjacentCount = 0;
-      dirs.forEach(([dc, dr]) => {
+      neighborOffsets.forEach(([dc, dr]) => {
         if (this.artifacts.has(`${art.col + dc},${art.row + dr}`)) adjacentCount++;
       });
       // Apply geometry combo: each neighbour adds 15% synergy, capped at 2×
@@ -764,7 +764,16 @@ export default class GameScene extends Phaser.Scene {
     const art = this.artifacts.get(`${col},${row}`);
     if (!art) return;
     const sell = Math.round(art.def.cost * this.costMult * ARTIFACT_SELL_RATIO);
-    this.infoTxt.setText(`${art.def.name}\nDMG: ${art.def.damage}  Range: ${art.def.range}\nSynergy: ×${art.synergy.toFixed(1)}`);
+    // Show effective values after mutations are applied
+    const effectiveDmg   = (art.def.damage * art.synergy *
+      (art.def.id === 'dark_sigil' ? this.muts.darkDamageMult : 1)).toFixed(1);
+    const effectiveRange = Math.round(art.def.range * this.muts.rangeMult);
+    const effectiveRate  = Math.round(art.def.fireRate * this.muts.fireRateMult);
+    this.infoTxt.setText(
+      `${art.def.name}\n` +
+      `DMG: ${effectiveDmg}  Range: ${effectiveRange}  Rate: ${effectiveRate}ms\n` +
+      `Synergy: ×${art.synergy.toFixed(1)}`
+    );
     this.sellTxt.setText(`Right-click to sell for 💰${sell}`);
     this.infoTxt.setVisible(true);
     this.sellTxt.setVisible(true);
