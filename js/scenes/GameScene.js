@@ -27,6 +27,9 @@ export default class GameScene extends Phaser.Scene {
     // ── Hero ──────────────────────────────────────────────────────────────
     this.heroKey  = data?.heroKey || GameState.heroKey || 'borislava';
     this.hero     = HEROES[this.heroKey];
+    GameState.score = 0;
+    GameState.totalKills = 0;
+    GameState.wavesCleared = 0;
 
     // ── Mutable state ─────────────────────────────────────────────────────
     this.money        = BASE_MONEY;
@@ -86,7 +89,8 @@ export default class GameScene extends Phaser.Scene {
 
     this.input.on('pointermove', this._onPointerMove, this);
     this.input.on('pointerdown', this._onPointerDown, this);
-    this.input.keyboard.on('keydown-ESC', () => this._clearSelection());
+    this._onEscKey = () => this._clearSelection();
+    this.input.keyboard?.on('keydown-ESC', this._onEscKey);
 
     this.events.on('shutdown', this._cleanup, this);
 
@@ -122,6 +126,9 @@ export default class GameScene extends Phaser.Scene {
   _cleanup() {
     this._regenTimer?.destroy();
     this._spawnTimerEvent?.destroy();
+    this.input?.off('pointermove', this._onPointerMove, this);
+    this.input?.off('pointerdown', this._onPointerDown, this);
+    this.input?.keyboard?.off('keydown-ESC', this._onEscKey);
     this.enemies.forEach(e => e.sprite?.destroy());
     this.projectiles.forEach(p => p.sprite?.destroy());
   }
@@ -131,7 +138,7 @@ export default class GameScene extends Phaser.Scene {
   // ═══════════════════════════════════════════════════════════════════════════
 
   _buildBackground() {
-    const bg = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'background_level_1')
+    this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'background_level_1')
       .setDisplaySize(GAME_WIDTH, GAME_HEIGHT).setDepth(0).setAlpha(0.96);
 
     const fieldShade = this.add.graphics().setDepth(0);
@@ -367,8 +374,6 @@ export default class GameScene extends Phaser.Scene {
       this.hoverGfx.setVisible(true);
     });
 
-    art._bgGfx  = bg;
-    art._drawFn = draw;
   }
 
   _buildHoverGraphic() {
@@ -421,7 +426,7 @@ export default class GameScene extends Phaser.Scene {
       this.hpBarGfx.fillStyle(0x330000);
       this.hpBarGfx.fillRect(bx, by, bw, bh);
       this.hpBarGfx.fillStyle(e.type.id === 'boss' ? 0xff3300 : 0xdd2200);
-      this.hpBarGfx.fillRect(bx, by, bw * (e.hp / e.maxHp), bh);
+      this.hpBarGfx.fillRect(bx, by, bw * Phaser.Math.Clamp(e.hp / e.maxHp, 0, 1), bh);
     });
   }
 
