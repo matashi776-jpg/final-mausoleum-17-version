@@ -8,7 +8,27 @@ export default class IntroScene extends Phaser.Scene {
   create() {
     const { width, height } = this.scale;
 
-    this.add.rectangle(width / 2, height / 2, width, height, 0x02000a);
+    this.add.image(width / 2, height / 2, 'background_menu')
+      .setDisplaySize(width, height)
+      .setAlpha(0.6);
+    this.add.rectangle(width / 2, height / 2, width, height, 0x02000a, 0.74);
+
+    this.add.image(200, height - 125, 'borislava')
+      .setDisplaySize(210, 310)
+      .setAlpha(0.16);
+    this.add.image(width / 2, height - 105, 'mar_ta')
+      .setDisplaySize(170, 255)
+      .setAlpha(0.14);
+    this.add.image(width - 200, height - 125, 'nazar')
+      .setDisplaySize(210, 310)
+      .setAlpha(0.16)
+      .setFlipX(true);
+
+    const panel = this.add.graphics();
+    panel.fillStyle(0x04000d, 0.76);
+    panel.fillRoundedRect(180, 46, width - 360, height - 112, 18);
+    panel.lineStyle(2, 0x5f2e91, 0.8);
+    panel.strokeRoundedRect(180, 46, width - 360, height - 112, 18);
 
     // Subtle star field
     const gfx = this.add.graphics();
@@ -56,7 +76,7 @@ export default class IntroScene extends Phaser.Scene {
 
     // Container for scrolling
     const container = this.add.container(0, 0);
-    const startY = height + 20;
+    const startY = height + 10;
     let offsetY = 0;
 
     loreText.forEach((line, i) => {

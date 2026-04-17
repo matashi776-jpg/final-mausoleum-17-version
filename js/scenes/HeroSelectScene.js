@@ -9,12 +9,20 @@ export default class HeroSelectScene extends Phaser.Scene {
     this._selected = GameState.heroKey || 'borislava';
 
     // Background
-    this.add.rectangle(width / 2, height / 2, width, height, 0x04000e);
+    this.add.image(width / 2, height / 2, 'background_menu')
+      .setDisplaySize(width, height)
+      .setAlpha(0.52);
+    this.add.rectangle(width / 2, height / 2, width, height, 0x04000e, 0.78);
 
     const gfx = this.add.graphics();
-    gfx.lineStyle(1, 0x1a0040, 0.3);
+    gfx.lineStyle(1, 0x1a0040, 0.22);
     for (let x = 0; x <= width; x += 60) gfx.lineBetween(x, 0, x, height);
     for (let y = 0; y <= height; y += 60) gfx.lineBetween(0, y, width, y);
+
+    this._previewFrame = this.add.graphics();
+    this._previewPortrait = this.add.image(width / 2, 176, this._selected)
+      .setDisplaySize(160, 232)
+      .setDepth(2);
 
     // Header
     this.add.text(width / 2, 42, 'CHOOSE YOUR KEEPER', {
@@ -28,19 +36,19 @@ export default class HeroSelectScene extends Phaser.Scene {
     this._cardX = { borislava: 240, nazar: 640, mar_ta: 1040 };
 
     heroKeys.forEach((key, i) => {
-      this._buildCard(key, this._cardX[key], 330);
+      this._buildCard(key, this._cardX[key], 410);
     });
 
     // Info / description panel
     this._descBg = this.add.graphics();
-    this._descTitle = this.add.text(width / 2, 582, '', {
+    this._descTitle = this.add.text(width / 2, 565, '', {
       fontFamily: 'serif', fontSize: '20px', color: '#ffcc55',
     }).setOrigin(0.5);
-    this._descBody = this.add.text(width / 2, 618, '', {
+    this._descBody = this.add.text(width / 2, 602, '', {
       fontFamily: 'sans-serif', fontSize: '15px', color: '#ccaadd',
       align: 'center', wordWrap: { width: 600 },
     }).setOrigin(0.5, 0);
-    this._ultimateText = this.add.text(width / 2, 670, '', {
+    this._ultimateText = this.add.text(width / 2, 654, '', {
       fontFamily: 'sans-serif', fontSize: '14px', color: '#88ddff',
       align: 'center',
     }).setOrigin(0.5);
@@ -52,15 +60,15 @@ export default class HeroSelectScene extends Phaser.Scene {
     const drawBegin = (h) => {
       beginBg.clear();
       beginBg.fillStyle(h ? 0x9966ff : 0x220033, 0.9);
-      beginBg.fillRoundedRect(width / 2 - 130, 692, 260, 48, 8);
+      beginBg.fillRoundedRect(width / 2 - 130, 680, 260, 48, 8);
       beginBg.lineStyle(2, 0x9966ff, 1);
-      beginBg.strokeRoundedRect(width / 2 - 130, 692, 260, 48, 8);
+      beginBg.strokeRoundedRect(width / 2 - 130, 680, 260, 48, 8);
     };
     drawBegin(false);
-    const beginTxt = this.add.text(width / 2, 716, 'BEGIN RITUAL', {
+    const beginTxt = this.add.text(width / 2, 704, 'BEGIN RITUAL', {
       fontFamily: 'sans-serif', fontSize: '22px', fontStyle: 'bold', color: '#cc88ff',
     }).setOrigin(0.5);
-    const beginZone = this.add.zone(width / 2, 716, 260, 48).setInteractive({ useHandCursor: true });
+    const beginZone = this.add.zone(width / 2, 704, 260, 48).setInteractive({ useHandCursor: true });
     beginZone.on('pointerover',  () => drawBegin(true));
     beginZone.on('pointerout',   () => drawBegin(false));
     beginZone.on('pointerdown',  () => this._startGame());
@@ -80,7 +88,7 @@ export default class HeroSelectScene extends Phaser.Scene {
 
     // Portrait
     const portrait = this.add.image(cx, cy - 60, key)
-      .setDisplaySize(100, 140);
+      .setDisplaySize(118, 170);
 
     // Name
     this.add.text(cx, cy + 80, hero.name, {
@@ -114,9 +122,24 @@ export default class HeroSelectScene extends Phaser.Scene {
     }
   }
 
+  _drawDescPanel(color) {
+    const { width } = this.scale;
+    this._descBg.clear();
+    this._descBg.fillStyle(0x070013, 0.92);
+    this._descBg.fillRoundedRect(width / 2 - 340, 536, 680, 144, 14);
+    this._descBg.lineStyle(2, color, 0.85);
+    this._descBg.strokeRoundedRect(width / 2 - 340, 536, 680, 144, 14);
+
+    this._previewFrame.clear();
+    this._previewFrame.fillStyle(0x090114, 0.86);
+    this._previewFrame.fillRoundedRect(width / 2 - 122, 66, 244, 230, 16);
+    this._previewFrame.lineStyle(2, color, 0.8);
+    this._previewFrame.strokeRoundedRect(width / 2 - 122, 66, 244, 230, 16);
+  }
+
   _hoverCard(key, hovered) {
     const hero = HEROES[key];
-    this._drawCard(this._cardGraphics[key], this._cardX[key], 330, hero.color, hovered);
+    this._drawCard(this._cardGraphics[key], this._cardX[key], 410, hero.color, hovered);
   }
 
   _selectHero(key, animate = true) {
@@ -125,19 +148,24 @@ export default class HeroSelectScene extends Phaser.Scene {
 
     Object.keys(HEROES).forEach(k => {
       const h = HEROES[k];
-      this._drawCard(this._cardGraphics[k], this._cardX[k], 330, h.color, k === key);
+      this._drawCard(this._cardGraphics[k], this._cardX[k], 410, h.color, k === key);
     });
 
     const hero = HEROES[key];
+    this._drawDescPanel(hero.color);
+    this._previewPortrait.setTexture(key);
     this._descTitle.setText(hero.name + '  —  ' + hero.title);
     this._descBody.setText(hero.description);
     this._ultimateText.setText('⚡ ULTIMATE: ' + hero.ultimateName + '  •  ' + hero.ultimateDesc);
 
     if (animate && prev !== key) {
+      this._previewPortrait.setScale(0.92);
       this.tweens.add({
-        targets:  this._descBody,
-        alpha:    { from: 0, to: 1 },
-        duration: 300,
+        targets:  [this._descBody, this._previewPortrait],
+        alpha:    { from: 0.75, to: 1 },
+        scaleX:   { from: 0.92, to: 1 },
+        scaleY:   { from: 0.92, to: 1 },
+        duration: 280,
       });
     }
   }

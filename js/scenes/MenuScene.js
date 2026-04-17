@@ -12,12 +12,39 @@ export default class MenuScene extends Phaser.Scene {
     // Background
     this.add.image(width / 2, height / 2, 'background_menu')
       .setDisplaySize(width, height)
-      .setAlpha(0.85);
+      .setAlpha(0.95);
+
+    const edgeShade = this.add.graphics();
+    edgeShade.fillStyle(0x020006, 0.72);
+    edgeShade.fillRect(0, 0, width, height);
+    edgeShade.fillStyle(0x000000, 0.28);
+    edgeShade.fillRect(0, 0, width * 0.22, height);
+    edgeShade.fillRect(width * 0.78, 0, width * 0.22, height);
+
+    this.add.image(132, height - 116, 'borislava')
+      .setDisplaySize(210, 320)
+      .setAlpha(0.52)
+      .setDepth(1);
+    this.add.image(width - 132, height - 118, 'nazar')
+      .setDisplaySize(210, 320)
+      .setAlpha(0.52)
+      .setDepth(1)
+      .setFlipX(true);
+    this.add.image(width / 2, height - 92, 'mar_ta')
+      .setDisplaySize(128, 194)
+      .setAlpha(0.34)
+      .setDepth(1);
 
     // Dark overlay vignette
     const vignette = this.add.graphics();
-    vignette.fillStyle(0x000000, 0.4);
-    vignette.fillCircle(width / 2, height / 2, 600);
+    vignette.fillStyle(0x000000, 0.58);
+    vignette.fillCircle(width / 2, height / 2, 620);
+
+    const panel = this.add.graphics();
+    panel.fillStyle(0x05000d, 0.74);
+    panel.fillRoundedRect(width / 2 - 290, 102, 580, 446, 18);
+    panel.lineStyle(2, 0x5c2d87, 0.85);
+    panel.strokeRoundedRect(width / 2 - 290, 102, 580, 446, 18);
 
     // Animated floating particles
     this._spawnParticles();
@@ -50,15 +77,20 @@ export default class MenuScene extends Phaser.Scene {
     this.tweens.add({ targets: line, alpha: 1, delay: 800, duration: 800 });
 
     // Buttons
-    this._makeButton(width / 2, 380, 'BEGIN', 0x9966ff, 0xcc88ff, () => {
+    this._makeButton(width / 2, 372, 'BEGIN', 0x9966ff, 0xcc88ff, () => {
       this.audio.fadeMusicOut(800);
       this._transition('IntroScene');
     });
 
-    this._makeButton(width / 2, 460, 'HERO SELECT', 0x006688, 0x44aacc, () => {
+    this._makeButton(width / 2, 448, 'HERO SELECT', 0x006688, 0x44aacc, () => {
       this.audio.fadeMusicOut(800);
       this._transition('HeroSelectScene');
     });
+
+    this.add.text(width / 2, 515, 'Three keepers. One barrier. Twelve waves of hunger.', {
+      fontFamily: 'sans-serif', fontSize: '15px',
+      color: '#a58ac6', stroke: '#000', strokeThickness: 2,
+    }).setOrigin(0.5).setAlpha(0.92);
 
     // Version + credits
     this.add.text(width - 12, height - 12, 'v1.0.0  •  Mausoleum Project', {

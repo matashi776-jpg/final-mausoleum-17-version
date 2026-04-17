@@ -132,7 +132,13 @@ export default class GameScene extends Phaser.Scene {
 
   _buildBackground() {
     const bg = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'background_level_1')
-      .setDisplaySize(GAME_WIDTH, GAME_HEIGHT).setDepth(0).setAlpha(0.7);
+      .setDisplaySize(GAME_WIDTH, GAME_HEIGHT).setDepth(0).setAlpha(0.96);
+
+    const fieldShade = this.add.graphics().setDepth(0);
+    fieldShade.fillStyle(0x04070c, 0.28);
+    fieldShade.fillRect(0, HUD_HEIGHT, FIELD_WIDTH, GAME_HEIGHT - HUD_HEIGHT);
+    fieldShade.fillStyle(0x12070d, 0.18);
+    fieldShade.fillRect(FIELD_WIDTH * 0.62, HUD_HEIGHT, FIELD_WIDTH * 0.38, GAME_HEIGHT - HUD_HEIGHT);
 
     // Cell grid overlay
     this.cellGfx = this.add.graphics().setDepth(1);
@@ -140,20 +146,20 @@ export default class GameScene extends Phaser.Scene {
       for (let r = 0; r < GRID_ROWS; r++) {
         const cx = c * CELL_SIZE, cy = HUD_HEIGHT + r * CELL_SIZE;
         if (PATH_CELL_SET.has(`${c},${r}`)) {
-          this.cellGfx.fillStyle(0x1a0808, 0.7);
+          this.cellGfx.fillStyle(0x18080c, 0.38);
         } else {
-          this.cellGfx.fillStyle(0x0d1a0d, 0.5);
+          this.cellGfx.fillStyle(0x071108, 0.16);
         }
         this.cellGfx.fillRect(cx + 1, cy + 1, CELL_SIZE - 2, CELL_SIZE - 2);
-        this.cellGfx.lineStyle(1, 0x1a2a1a, 0.3);
+        this.cellGfx.lineStyle(1, 0x48624c, 0.16);
         this.cellGfx.strokeRect(cx, cy, CELL_SIZE, CELL_SIZE);
       }
     }
   }
 
   _buildPathVisual() {
-    const pg = this.add.graphics().setDepth(2).setAlpha(0.4);
-    pg.fillStyle(0x3a1010);
+    const pg = this.add.graphics().setDepth(2).setAlpha(0.42);
+    pg.fillStyle(0x3a1010, 0.85);
     PATH_WAYPOINTS.forEach((wp, i) => {
       if (i === 0) return;
       const prev = PATH_WAYPOINTS[i - 1];
@@ -171,8 +177,8 @@ export default class GameScene extends Phaser.Scene {
       ], true);
     });
     // Arrow direction indicators
-    const ag = this.add.graphics().setDepth(3).setAlpha(0.5);
-    ag.fillStyle(0xaa3300);
+    const ag = this.add.graphics().setDepth(3).setAlpha(0.75);
+    ag.fillStyle(0x7cf0a7, 0.95);
     PATH_WAYPOINTS.forEach((wp, i) => {
       if (i === 0 || i === PATH_WAYPOINTS.length - 1) return;
       ag.fillCircle(wp.x, wp.y, 6);
@@ -181,17 +187,34 @@ export default class GameScene extends Phaser.Scene {
 
   _buildBarrierVisual() {
     this.barrierGfx = this.add.graphics().setDepth(5);
+    this.barrierRuneGfx = this.add.graphics().setDepth(6);
     this._drawBarrier();
   }
 
   _drawBarrier() {
     this.barrierGfx.clear();
+    this.barrierRuneGfx.clear();
     const ratio = this.barrierHP / this.barrierMaxHP;
     const col = ratio > 0.5 ? 0x9966ff : ratio > 0.25 ? 0xff9900 : 0xff3300;
-    this.barrierGfx.fillStyle(col, 0.7);
+    this.barrierGfx.fillStyle(col, 0.2);
+    this.barrierGfx.fillRect(BARRIER_X - 24, HUD_HEIGHT, 44, GAME_HEIGHT - HUD_HEIGHT);
+    this.barrierGfx.fillStyle(col, 0.72);
     this.barrierGfx.fillRect(BARRIER_X - 8, HUD_HEIGHT, 12, GAME_HEIGHT - HUD_HEIGHT);
     this.barrierGfx.lineStyle(2, 0xffffff, 0.3);
     this.barrierGfx.strokeRect(BARRIER_X - 8, HUD_HEIGHT, 12, GAME_HEIGHT - HUD_HEIGHT);
+
+    const runeY = HUD_HEIGHT + (GAME_HEIGHT - HUD_HEIGHT) / 2;
+    this.barrierRuneGfx.lineStyle(2, col, 0.95);
+    this.barrierRuneGfx.strokeCircle(BARRIER_X - 2, runeY, 42);
+    this.barrierRuneGfx.strokeCircle(BARRIER_X - 2, runeY, 24);
+    this.barrierRuneGfx.strokePoints([
+      { x: BARRIER_X - 2, y: runeY - 28 },
+      { x: BARRIER_X + 26, y: runeY },
+      { x: BARRIER_X - 2, y: runeY + 28 },
+      { x: BARRIER_X - 30, y: runeY },
+    ], true);
+    this.barrierRuneGfx.fillStyle(col, 0.22);
+    this.barrierRuneGfx.fillCircle(BARRIER_X - 2, runeY, 16);
   }
 
   _buildHUD() {
@@ -239,8 +262,11 @@ export default class GameScene extends Phaser.Scene {
     }).setDepth(31);
     this.ecstasyTrack = this.add.graphics().setDepth(31);
     this.ecstasyFill  = this.add.graphics().setDepth(31);
-    this.ecstasyTrack.fillStyle(0x001a22); this.ecstasyTrack.fillRect(ex + 16, 36, 120, 14);
-    this.ecstasyTrack.lineStyle(1, 0x006688); this.ecstasyTrack.strokeRect(ex + 16, 36, 120, 14);
+    this.ecstasyTrack.fillStyle(0x001a22, 0.85);
+    this.ecstasyTrack.fillRect(ex + 19, 39, 114, 10);
+    this.add.image(ex + 76, 43, 'faith_energy_bar')
+      .setDisplaySize(158, 22)
+      .setDepth(32);
 
     // Ultimate button
     this.ultBg  = this.add.graphics().setDepth(31);
@@ -272,21 +298,31 @@ export default class GameScene extends Phaser.Scene {
     pg.lineStyle(1, 0x2a0055, 1);
     pg.lineBetween(px, 0, px, GAME_HEIGHT);
 
+    const portraitFrame = this.add.graphics().setDepth(31);
+    portraitFrame.fillStyle(0x10071f, 0.88);
+    portraitFrame.fillRoundedRect(px + 14, 56, PANEL_WIDTH - 28, 92, 10);
+    portraitFrame.lineStyle(1, this.hero.color, 0.75);
+    portraitFrame.strokeRoundedRect(px + 14, 56, PANEL_WIDTH - 28, 92, 10);
+
     this.add.text(px + 12, 8, 'ARTIFACTS', {
       fontFamily: 'serif', fontSize: '15px', color: '#8866cc',
     }).setDepth(31);
 
     // Hero portrait + name
-    this.add.image(px + 50, 100, this.heroKey).setDisplaySize(70, 90).setDepth(31);
-    this.add.text(px + 90, 68, this.hero.name, {
+    this.add.image(px + 58, 101, this.heroKey).setDisplaySize(74, 104).setDepth(31);
+    this.add.text(px + 104, 74, this.hero.name, {
       fontFamily: 'serif', fontSize: '16px', color: '#' + this.hero.color.toString(16).padStart(6,'0'),
     }).setDepth(31);
-    this.add.text(px + 90, 90, this.hero.ultimateName, {
+    this.add.text(px + 104, 96, this.hero.title, {
+      fontFamily: 'sans-serif', fontSize: '11px', color: '#a28cb6',
+      wordWrap: { width: PANEL_WIDTH - 122 },
+    }).setDepth(31);
+    this.add.text(px + 104, 122, `ULT: ${this.hero.ultimateName}`, {
       fontFamily: 'sans-serif', fontSize: '12px', color: '#4488aa',
     }).setDepth(31);
 
     // Artifact shop buttons
-    ARTIFACTS.forEach((art, i) => this._buildShopItem(art, px + 10, 160 + i * 110));
+    ARTIFACTS.forEach((art, i) => this._buildShopItem(art, px + 10, 170 + i * 110));
 
     // Sell / info label (shown when a placed artifact is selected)
     this.sellBtn  = this.add.graphics().setDepth(32).setVisible(false);
@@ -312,11 +348,15 @@ export default class GameScene extends Phaser.Scene {
     draw(false);
 
     const colorHex = '#' + art.color.toString(16).padStart(6, '0');
-    this.add.text(x + 8, y + 8,  art.name, { fontFamily: 'serif', fontSize: '15px', color: colorHex }).setDepth(32);
-    this.add.text(x + 8, y + 30, `💰 ${art.cost}`, { fontFamily: 'sans-serif', fontSize: '13px', color: '#ffdd55' }).setDepth(32);
-    this.add.text(x + 8, y + 50, art.description, {
+    this.add.image(x + 34, y + 48, 'totem')
+      .setDisplaySize(42, 42)
+      .setTint(art.color)
+      .setDepth(32);
+    this.add.text(x + 66, y + 8,  art.name, { fontFamily: 'serif', fontSize: '15px', color: colorHex }).setDepth(32);
+    this.add.text(x + 66, y + 30, `💰 ${art.cost}`, { fontFamily: 'sans-serif', fontSize: '13px', color: '#ffdd55' }).setDepth(32);
+    this.add.text(x + 66, y + 50, art.description, {
       fontFamily: 'sans-serif', fontSize: '12px', color: '#998aaa',
-      wordWrap: { width: W - 16 },
+      wordWrap: { width: W - 76 },
     }).setDepth(32);
 
     const zone = this.add.zone(x + W / 2, y + H / 2, W, H).setInteractive({ useHandCursor: true }).setDepth(33);
@@ -354,10 +394,10 @@ export default class GameScene extends Phaser.Scene {
 
     // Ecstasy bar
     const er = Phaser.Math.Clamp(this.ecstasy / this.ecstasyMax, 0, 1);
-    const ex = GAME_WIDTH - PANEL_WIDTH - 114;
+    const ex = GAME_WIDTH - PANEL_WIDTH - 111;
     this.ecstasyFill.clear();
     this.ecstasyFill.fillStyle(0x00aacc, 0.9);
-    this.ecstasyFill.fillRect(ex, 36, 120 * er, 14);
+    this.ecstasyFill.fillRect(ex, 39, 114 * er, 10);
 
     // Ultimate button glow when ready
     this._drawUltButton(er >= 1);
@@ -459,7 +499,6 @@ export default class GameScene extends Phaser.Scene {
 
     const sprite = this.add.image(start.x, start.y, typeDef.sprite)
       .setDisplaySize(CELL_SIZE * typeDef.scale, CELL_SIZE * typeDef.scale)
-      .setTint(typeDef.tint)
       .setDepth(15);
 
     const enemy = {
@@ -487,7 +526,7 @@ export default class GameScene extends Phaser.Scene {
       // Slow countdown
       if (e.slowTimer > 0) {
         e.slowTimer -= delta;
-        if (e.slowTimer <= 0) { e.slowMult = 1.0; e.sprite.clearTint(); e.sprite.setTint(e.type.tint); }
+        if (e.slowTimer <= 0) { e.slowMult = 1.0; e.sprite.clearTint(); }
       }
 
       const wp = PATH_WAYPOINTS[e.waypointIdx];
